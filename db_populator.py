@@ -18,7 +18,7 @@ def postgres(response):
         title = json_object['snippet']['title']
 
         try:
-            cursor.execute("INSERT INTO Likes2 VALUES(%s,NOW(),%s)", (title, date_time_object))
+            cursor.execute("INSERT INTO Likes VALUES(%s,NOW(),%s)", (title, date_time_object))
             connection.commit()
         except psycopg2.Error as e:
             print "List is updated"
