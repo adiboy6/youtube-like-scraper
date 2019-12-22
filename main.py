@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-import extractor
-
 import psycopg2
-
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
+
+import options
 
 scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
 
@@ -33,7 +31,11 @@ def main():
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
 
-    extractor.get_likes(youtube)
+    # To create the list
+    options.create(youtube)
+
+    # To update the list
+    # options.update(youtube)
 
 
 if __name__ == "__main__":
