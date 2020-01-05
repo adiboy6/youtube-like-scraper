@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import os
-import datetime
-
 import psycopg2
-
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 
+import options
+
 scopes = ["https://www.googleapis.com/auth/youtube.readonly"]
+
+psql_connection = psycopg2.connect("dbname=youtube user=adiboy")
+
+psql_cursor = psql_connection.cursor()
 
 
 def main():
@@ -28,47 +31,14 @@ def main():
     youtube = googleapiclient.discovery.build(
         api_service_name, api_version, credentials=credentials)
 
-    token = None
+    # To create the list
+    options.create(youtube)
 
-    conn = psycopg2.connect("dbname=youtube user=adiboy")
-
-    cur = conn.cursor()
-
-    while True:
-        request = youtube.videos().list(
-            part="snippet",
-            maxResults="50",
-            pageToken=token,
-            myRating="like"
-        )
-
-        response = request.execute()
-
-        flag = False
-
-        for json_object in response['items']:
-
-            date_time_object = datetime.datetime.strptime(json_object['snippet']['publishedAt'],
-                                                          '%Y-%m-%dT%H:%M:%S.%fZ')
-
-            title = json_object['snippet']['title']
-
-            try:
-                cur.execute("INSERT INTO Likes1 VALUES(%s,NOW(),%s)", (title, date_time_object))
-                conn.commit()
-            except psycopg2.Error as e:
-                print "List is updated"
-                flag = True
-                break
-
-        if ('nextPageToken' not in response) or flag:
-            break
-
-        token = response['nextPageToken']
-
-    conn.close()
-    cur.close()
+    # To update the list
+    # options.update(youtube)
 
 
 if __name__ == "__main__":
     main()
+    psql_cursor.close()
+    psql_connection.close()
