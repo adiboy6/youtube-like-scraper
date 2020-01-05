@@ -1,24 +1,23 @@
 import db_populator_reverse
+import find_table
 
 
-def get_likes(youtube):
-    token = None
-    while True:
-        request = youtube.videos().list(
-            part="snippet",
-            maxResults="50",
-            pageToken=token,
-            myRating="like"
-        )
+def get_likes(youtube, token=None):
 
-        response = request.execute()
+    request = youtube.videos().list(
+        part="snippet",
+        maxResults="50",
+        pageToken=token,
+        myRating="like"
+    )
 
-        if 'nextPageToken' not in response:
-            db_populator_reverse.postgres(response)
-            return
+    response = request.execute()
 
-        token = response['nextPageToken']
+    if find_table.title_column(response['items'][0]['snippet']['title']):
+        return
 
-        if db_populator_reverse.postgres(response):
-            return
+    token = response['nextPageToken']
 
+    get_likes(youtube, token)
+
+    db_populator_reverse.postgres(response)

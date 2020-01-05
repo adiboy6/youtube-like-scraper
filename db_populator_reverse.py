@@ -1,6 +1,5 @@
-import psycopg2
 import datetime
-
+import find_table
 import main
 
 
@@ -10,19 +9,15 @@ def postgres(response):
 
     cursor = main.psql_cursor
 
-    for json_object in response['items']:
+    for json_object in response['items'][::-1]:
 
         date_time_object = datetime.datetime.strptime(json_object['snippet']['publishedAt'],
                                                       '%Y-%m-%dT%H:%M:%S.%fZ')
 
         title = json_object['snippet']['title']
 
-        try:
+        if find_table.title_column(title):
+            pass
+        else:
             cursor.execute("INSERT INTO Likes VALUES(%s,NOW(),%s)", (title, date_time_object))
             connection.commit()
-        # Whenever the title name is found again, the list is updated
-        except psycopg2.Error as e:
-            print "List is updated"
-            return True
-
-    return False
