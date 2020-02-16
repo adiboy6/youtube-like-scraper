@@ -1,7 +1,8 @@
-import db_populator
+from db import postgres
 
 
 def get_likes(youtube, token=None):
+    postgres_obj = postgres.Postgre("Likes")
 
     request = youtube.videos().list(
         part="snippet",
@@ -12,12 +13,11 @@ def get_likes(youtube, token=None):
 
     response = request.execute()
 
-    if 'nextPageToken' not in response:
-        db_populator.postgres(response)
+    if postgres_obj.find_title(response['items'][0]['snippet']['title']):
         return
 
     token = response['nextPageToken']
 
     get_likes(youtube, token)
 
-    db_populator.postgres(response)
+    postgres_obj.reverse(response)

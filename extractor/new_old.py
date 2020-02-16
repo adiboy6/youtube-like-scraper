@@ -1,8 +1,8 @@
-import db_populator_reverse
-import find_table
+from db import postgres
 
 
 def get_likes(youtube, token=None):
+    postgres_obj = postgres.Postgre("Likes")
 
     request = youtube.videos().list(
         part="snippet",
@@ -13,11 +13,12 @@ def get_likes(youtube, token=None):
 
     response = request.execute()
 
-    if find_table.title_column(response['items'][0]['snippet']['title']):
+    if 'nextPageToken' not in response:
+        postgres_obj.forward(response)
         return
 
     token = response['nextPageToken']
 
     get_likes(youtube, token)
 
-    db_populator_reverse.postgres(response)
+    postgres_obj.forward(response)

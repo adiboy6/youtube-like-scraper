@@ -1,11 +1,10 @@
-import extractor_reverse
-import extractor
+from extractor import old_new, new_old
 
 
 def create(youtube):
-    extractor.get_likes(youtube)
+    new_old.get_likes(youtube)
     print "likes are created!"
 
 
 def update(youtube):
-    extractor_reverse.get_likes(youtube)
+    old_new.get_likes(youtube)
